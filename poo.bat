@@ -41,6 +41,11 @@ if %errorlevel% neq 0 (
     
     :: Check if Python is installed but not in PATH
     set "pythonPath=C:\Users\%username%\AppData\Local\Programs\Python\Python312\python.exe"
+    
+    :: If Python is not in PATH, check and clean any old Python PATH entries
+    echo Cleaning up old Python PATH entries...
+    setx PATH "%PATH:;C:\Users\%username%\AppData\Local\Programs\Python\Python312;%"
+    
     if exist "%pythonPath%" (
         echo Python found at %pythonPath%. Adding to PATH...
         setx PATH "%PATH%;C:\Users\%username%\AppData\Local\Programs\Python\Python312"
@@ -59,8 +64,14 @@ if %errorlevel% neq 0 (
             pause
             exit /b
         )
+
+        echo Python installed successfully.
         
-        echo Python installed successfully. Restarting script to apply changes.
+        :: Force refresh of environment variables
+        echo Refreshing environment variables...
+        call :refreshEnv
+
+        echo Python installation completed. Restarting script to apply changes.
         echo.
         echo Press any key to restart the script...
         pause
@@ -134,4 +145,14 @@ echo Running program executable...
 echo.
 echo Done.
 pause
+exit /b
+
+:refreshEnv
+:: Refresh environment variables
+set "refreshCmd=refreshenv"
+if exist "%ProgramFiles(x86)%\chocolatey\bin\refreshenv.cmd" (
+    call "%ProgramFiles(x86)%\chocolatey\bin\refreshenv.cmd"
+) else (
+    echo "Refreshenv command not found, please restart your machine."
+)
 exit /b
