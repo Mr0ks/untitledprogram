@@ -41,6 +41,14 @@ if %errorlevel% neq 0 (
     powershell -Command "Invoke-WebRequest -OutFile python-installer.exe %pythonInstaller%"
     start /wait python-installer.exe /quiet InstallAllUsers=1 PrependPath=1 Include_pip=1
     del python-installer.exe
+
+    :: Verify Python installed successfully
+    python --version >nul 2>&1
+    if %errorlevel% neq 0 (
+        echo Python installation failed. Exiting.
+        pause
+        exit /b
+    )
 ) else (
     echo Python already installed.
 )
@@ -52,19 +60,30 @@ if %errorlevel% neq 0 (
     powershell -Command "Invoke-WebRequest -OutFile git-installer.exe %gitInstaller%"
     start /wait git-installer.exe /VERYSILENT /NORESTART
     del git-installer.exe
+
+    :: Verify Git installed successfully
+    git --version >nul 2>&1
+    if %errorlevel% neq 0 (
+        echo Git installation failed. Exiting.
+        pause
+        exit /b
+    )
 ) else (
     echo Git already installed.
 )
 
-:: Install Cryptolens dependencies via pip
-echo Installing Cryptolens Python dependencies...
-pip show cryptolens >nul 2>&1
+:: Install 'licensing' via pip
+echo.
+echo Installing 'licensing' Python package...
+pip show licensing >nul 2>&1
 if %errorlevel% neq 0 (
-    pip install cryptolens
+    pip install licensing
 ) else (
-    echo 'cryptolens' already installed.
+    echo 'licensing' already installed.
 )
 
+:: Install additional dependencies via pip
+echo Installing other required Python modules...
 pip show requests >nul 2>&1
 if %errorlevel% neq 0 (
     pip install requests
@@ -72,7 +91,7 @@ if %errorlevel% neq 0 (
     echo 'requests' already installed.
 )
 
-:: Clone repository
+:: Clone your program repo
 if not exist "%installDir%" (
     echo Cloning 'untitledprogram' repository into ProgramData...
     git clone https://github.com/Mr0ks/untitledprogram "%installDir%"
