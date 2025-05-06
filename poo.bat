@@ -37,20 +37,39 @@ set "gitInstaller=https://github.com/git-for-windows/git/releases/download/v2.45
 :: Check for Python
 python --version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo Python not found. Downloading and installing...
-    powershell -Command "Invoke-WebRequest -OutFile python-installer.exe %pythonInstaller%"
-    start /wait python-installer.exe /quiet InstallAllUsers=1 PrependPath=1 Include_pip=1
-    del python-installer.exe
+    echo Python not found in PATH. Checking installation...
+    
+    :: Check if Python is installed but not in PATH
+    set "pythonPath=C:\Users\%username%\AppData\Local\Programs\Python\Python312\python.exe"
+    if exist "%pythonPath%" (
+        echo Python found at %pythonPath%. Adding to PATH...
+        setx PATH "%PATH%;C:\Users\%username%\AppData\Local\Programs\Python\Python312"
+        set "python=%pythonPath%"
+    ) else (
+        echo Python not found. Downloading and installing...
+        powershell -Command "Invoke-WebRequest -OutFile python-installer.exe %pythonInstaller%"
+        start /wait python-installer.exe /quiet InstallAllUsers=1 PrependPath=1 Include_pip=1
+        del python-installer.exe
 
-    :: Verify Python installed successfully
-    python --version >nul 2>&1
-    if %errorlevel% neq 0 (
-        echo Python installation failed. Exiting.
-        pause
-        exit /b
+        :: Verify Python installed successfully
+        python --version >nul 2>&1
+        if %errorlevel% neq 0 (
+            echo Python installation failed. Exiting.
+            pause
+            exit /b
+        )
     )
 ) else (
     echo Python already installed.
+)
+
+:: Check if Python is now recognized
+python --version >nul 2>&1
+if %errorlevel% neq 0 (
+    echo Python still not recognized. Trying to run from installation directory...
+    start "" "%pythonPath%" --version
+    pause
+    exit /b
 )
 
 :: Check for Git
