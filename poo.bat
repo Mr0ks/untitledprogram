@@ -48,7 +48,8 @@ if %errorlevel% neq 0 (
     ) else (
         echo Python not found. Downloading and installing...
         powershell -Command "Invoke-WebRequest -OutFile python-installer.exe %pythonInstaller%"
-        start /wait python-installer.exe /quiet InstallAllUsers=1 PrependPath=1 Include_pip=1
+        echo Starting Python installation...
+        start /wait python-installer.exe /passive InstallAllUsers=1 PrependPath=1 Include_pip=1
         del python-installer.exe
 
         :: Verify Python installed successfully
@@ -58,6 +59,13 @@ if %errorlevel% neq 0 (
             pause
             exit /b
         )
+        
+        echo Python installed successfully. Restarting script to apply changes.
+        echo.
+        echo Press any key to restart the script...
+        pause
+        call "%~f0"
+        exit /b
     )
 ) else (
     echo Python already installed.
