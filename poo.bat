@@ -66,15 +66,9 @@ if %errorlevel% neq 0 (
         )
 
         echo Python installed successfully.
-        
-        :: Force refresh of environment variables
-        echo Refreshing environment variables...
-        call :refreshEnv
 
-        echo Python installation completed. Restarting script to apply changes.
-        echo.
-        echo Press any key to restart the script...
-        pause
+        :: After installation, restart the script to apply changes to PATH
+        echo Restarting script to apply Python installation...
         call "%~f0"
         exit /b
     )
@@ -145,14 +139,4 @@ echo Running program executable...
 echo.
 echo Done.
 pause
-exit /b
-
-:refreshEnv
-:: Refresh environment variables
-set "refreshCmd=refreshenv"
-if exist "%ProgramFiles(x86)%\chocolatey\bin\refreshenv.cmd" (
-    call "%ProgramFiles(x86)%\chocolatey\bin\refreshenv.cmd"
-) else (
-    echo "Refreshenv command not found, please restart your machine."
-)
 exit /b
